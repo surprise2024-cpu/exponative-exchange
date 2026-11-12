@@ -22,10 +22,12 @@ export default function ActionButton({ title, onPress }: ActionButtonProps) {
 
 const styles = StyleSheet.create({
   button: {
+    width: "100%",
     backgroundColor: "#FFFFFF",
     borderRadius: 30,
     paddingVertical: 15,
     alignItems: "center",
+    justifyContent: "center",
   },
   hovered: {
     backgroundColor: "#E6DBE8",
