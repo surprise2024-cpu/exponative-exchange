@@ -1,13 +1,6 @@
 import { StatusBar } from "expo-status-bar";
 import { useState } from "react";
-import {
-  Alert,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import ActionButton from "@/components/ActionButton";
@@ -22,8 +15,16 @@ import {
   DollarSign,
 } from "lucide-react-native";
 
+import BottomSheet from "../components/BottomSheet";
+
+type SheetType = "buy" | "notifications" | "back" | null;
+
 export default function HomeScreen() {
   const [swapped, setSwapped] = useState(false);
+  const [isPresented, setIsPresented] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showBackSheet, setShowBackSheet] = useState(false);
+  const [activeSheet, setActiveSheet] = useState<SheetType>(null);
 
   const eth = {
     currency: "ETH",
@@ -49,17 +50,28 @@ export default function HomeScreen() {
       >
         <View style={styles.header}>
           <Pressable
-            style={styles.headerIcon}
-            onPress={() => Alert.alert("Warning!", "There's no going back now")}
+            onPress={() => setActiveSheet("back")}
+            accessibilityRole="button"
+            accessibilityLabel="Back"
+            style={({ pressed, hovered }) => [
+              styles.headerButton,
+              hovered && styles.hovered,
+              pressed && styles.pressed,
+            ]}
           >
-            <ChevronLeft size={20} color="#ffffff" />
+            <ChevronLeft size={20} color="#ffffff" strokeWidth={1.8} />
           </Pressable>
           <Text style={styles.headerTitle}>Exchange</Text>
           <Pressable
-            style={styles.headerIcon}
-            onPress={() => Alert.alert("Notice!", "Ringa Ding Ding")}
+            onPress={() => setActiveSheet("notifications")}
+            accessibilityLabel="Notifications"
+            style={({ pressed, hovered }) => [
+              styles.headerIcon,
+              hovered && styles.hovered,
+              pressed && styles.pressed,
+            ]}
           >
-            <BellDot size={20} color="#b48baf" />
+            <BellDot size={20} color="#b48baf" strokeWidth={1.8} />
           </Pressable>
         </View>
 
@@ -88,9 +100,7 @@ export default function HomeScreen() {
 
         <ActionButton
           title={swapped ? "Buy USD" : "Buy ETH"}
-          onPress={() =>
-            Alert.alert("Ncaaaww", "You really thought you had it like that")
-          }
+          onPress={() => setActiveSheet("buy")}
         />
 
         <View style={styles.details}>
@@ -99,6 +109,31 @@ export default function HomeScreen() {
           <DetailRow label="Spread" value="0.2%" />
           <DetailRow label="Gas fee" value="0.0045 ETH" />
         </View>
+
+        <BottomSheet
+          isPresented={activeSheet !== null}
+          onDismiss={() => setActiveSheet(null)}
+          snapPoints={["half"]}
+          title={
+            activeSheet === "buy"
+              ? "To the Moon?"
+              : activeSheet === "notifications"
+                ? "All caught Up!"
+                : "Leaving Already?"
+          }
+          subTitle={
+            activeSheet === "buy"
+              ? "Let's make sure that we can afford the fuel first."
+              : activeSheet === "notifications"
+                ? "No new notifications. Enjoy the peace!"
+                : "The crypto market will miss you!"
+          }
+        >
+          <ActionButton
+            title={activeSheet === "notifications" ? "Got it" : "Close"}
+            onPress={() => setActiveSheet(null)}
+          />
+        </BottomSheet>
       </ScrollView>
     </SafeAreaView>
   );
@@ -130,6 +165,16 @@ const styles = StyleSheet.create({
     color: "#FFFFFF",
     fontSize: 26,
     width: 28,
+    padding: 8,
+  },
+  hovered: {
+    opacity: 0.75,
+  },
+  pressed: {
+    opacity: 0.5,
+  },
+  headerButton: {
+    padding: 8,
   },
   headerTitle: {
     color: "#FFFFFF",
@@ -176,5 +221,18 @@ const styles = StyleSheet.create({
   details: {
     marginTop: 22,
     gap: 12,
+  },
+  button: {
+    width: "100%",
+    backgroundColor: "#FFFFFF",
+    paddingVertical: 14,
+    paddingHorizontal: 40,
+    borderRadius: 25,
+    marginTop: 20,
+    alignItems: "center",
+  },
+  text: {
+    color: "#000000",
+    fontWeight: "600",
   },
 });
