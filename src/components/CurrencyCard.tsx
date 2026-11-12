@@ -1,12 +1,13 @@
 import { ChevronDown } from "lucide-react-native";
 import { ReactNode } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 
 type CurrencyCardProps = {
   currency: string;
   symbol: ReactNode;
   amount: string;
   balance: string;
+  onPress: () => void;
 };
 
 export default function CurrencyCard({
@@ -14,16 +15,25 @@ export default function CurrencyCard({
   symbol,
   amount,
   balance,
+  onPress,
 }: CurrencyCardProps) {
   return (
     <View style={styles.container}>
-      <View style={styles.currencyRow}>
+      <Pressable
+        onPress={onPress}
+        accessibilityRole="button"
+        accessibilityLabel={`Select ${currency} currency`}
+        style={({ pressed, hovered }) => [
+          styles.currencyRow,
+          { opacity: pressed ? 0.5 : hovered ? 0.75 : 1 },
+        ]}
+      >
         <View style={styles.icon}>{symbol}</View>
-        <Text style={styles.currency}>
-          {currency}
-          <ChevronDown size={15} color="#b48baf" />
-        </Text>
-      </View>
+
+        <Text style={styles.currency}>{currency}</Text>
+
+        <ChevronDown size={18} color="#B48BAF" />
+      </Pressable>
 
       <Text style={styles.amount}>{amount}</Text>
 
