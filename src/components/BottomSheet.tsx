@@ -1,26 +1,49 @@
-import { BottomSheet, RNHostView, SnapPoint } from "@expo/ui";
-import { StyleSheet, Text, View, useWindowDimensions } from "react-native";
+import type { SnapPoint } from "@expo/ui";
+import { BottomSheet, RNHostView } from "@expo/ui";
+import type { ReactNode } from "react";
+
+import {
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+  useWindowDimensions,
+} from "react-native";
 
 type BottomSheetProps = {
   isPresented: boolean;
   onDismiss: () => void;
-  children: React.ReactNode;
+  children: ReactNode;
+  icon?: ReactNode;
   snapPoints?: SnapPoint[];
   showDragIndicator?: boolean;
   title?: string;
   subTitle?: string;
+  scrollable?: boolean;
 };
 
 export default function BottomSheetExample({
   isPresented,
   onDismiss,
   children,
-  snapPoints,
+  icon,
+  snapPoints = ["half", "full"],
   showDragIndicator = true,
   title,
   subTitle,
+  scrollable = false,
 }: BottomSheetProps) {
-  const { height } = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
+
+  const header = (
+    <>
+      {icon && <View style={styles.iconContainer}>{icon}</View>}
+
+      {title && <Text style={styles.title}>{title}</Text>}
+
+      {subTitle && <Text style={styles.subTitle}>{subTitle}</Text>}
+    </>
+  );
 
   return (
     <BottomSheet
@@ -29,45 +52,103 @@ export default function BottomSheetExample({
       snapPoints={snapPoints}
       showDragIndicator={showDragIndicator}
     >
-      <RNHostView>
-        <View style={[styles.container, { height: height * 0.4 }]}>
-          <View style={styles.content}>
-            {title && <Text style={styles.title}>{title}</Text>}
+      {scrollable ? (
+        // Currency selector: flexible, scrollable content
+        <RNHostView>
+          <View style={styles.scrollContainer}>
+            <View style={styles.header}>{header}</View>
 
-            {subTitle && <Text style={styles.subTitle}>{subTitle}</Text>}
-
+            <ScrollView
+              style={styles.scrollArea}
+              contentContainerStyle={styles.scrollContent}
+              nestedScrollEnabled
+              showsVerticalScrollIndicator
+            >
+              {children}
+            </ScrollView>
+          </View>
+        </RNHostView>
+      ) : (
+        // Other sheets: centered content
+        <RNHostView matchContents>
+          <View
+            style={[
+              styles.centeredContainer,
+              {
+                width: Math.min(width - 32, 420),
+                height: Math.min(height * 0.42, 420),
+              },
+            ]}
+          >
+            {header}
             {children}
           </View>
-        </View>
-      </RNHostView>
+        </RNHostView>
+      )}
     </BottomSheet>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    width: "100%",
+  // Normal BottomSheets
+  centeredContainer: {
+    justifyContent: "center",
     alignItems: "stretch",
-    justifyContent: "center",
+    alignSelf: "center",
     paddingHorizontal: 24,
-  },
-  centerVertically: {
-    justifyContent: "center",
-  },
-  content: {
-    width: "100%",
-    alignSelf: "stretch",
+    paddingVertical: 20,
     gap: 18,
   },
+
+  // Currency selector
+  scrollContainer: {
+    flex: 1,
+    width: "100%",
+    paddingHorizontal: 24,
+    paddingTop: 24,
+    paddingBottom: 24,
+  },
+
+  header: {
+    width: "100%",
+    alignItems: "center",
+    gap: 12,
+    marginBottom: 20,
+  },
+
+  scrollArea: {
+    flex: 1,
+    width: "100%",
+    minHeight: 0,
+  },
+
+  scrollContent: {
+    paddingBottom: 24,
+    gap: 10,
+  },
+
+  // Shared elements
+  iconContainer: {
+    width: 68,
+    height: 68,
+    borderRadius: 34,
+    backgroundColor: "#302633",
+    alignItems: "center",
+    justifyContent: "center",
+    alignSelf: "center",
+    marginBottom: 8,
+  },
+
   title: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "#ffffff",
+    color: "#FFFFFF",
     textAlign: "center",
   },
+
   subTitle: {
     fontSize: 16,
-    color: "#ddd9d9",
+    color: "#DDD9D9",
     textAlign: "center",
   },
 });
